@@ -1,0 +1,5 @@
+/target
+.idea
+*.iml
+*.kdev4
+*.kate-swp
