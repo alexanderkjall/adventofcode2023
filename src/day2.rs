@@ -14,8 +14,9 @@ pub fn calculate() -> Result<(String, String), Error> {
     let parsed_input: Vec<Game> = parse_input(&input).unwrap();
 
     let first: u32 = calculate_possible(&parsed_input, 12, 13, 14);
+    let second: u32 = calculate_minimal(&parsed_input);
 
-    Ok((format!("{}", first), String::new()))
+    Ok((format!("{}", first), format!("{}", second)))
 }
 
 fn calculate_possible(input: &[Game], limit_red: u32, limit_green: u32, limit_blue: u32) -> u32 {
@@ -23,6 +24,22 @@ fn calculate_possible(input: &[Game], limit_red: u32, limit_green: u32, limit_bl
         .iter()
         .filter(|g| g.allowed(limit_red, limit_green, limit_blue))
         .fold(0, |acc, g| acc + g.id)
+}
+
+fn calculate_minimal(input: &[Game]) -> u32 {
+    input
+        .iter()
+        .map(calculate_minimal_game)
+        .map(|t| t.0 * t.1 * t.2)
+        .sum()
+}
+
+fn calculate_minimal_game(input: &Game) -> (u32, u32, u32) {
+    (
+        input.hands.iter().map(|h| h.red).max().unwrap_or(0),
+        input.hands.iter().map(|h| h.green).max().unwrap_or(0),
+        input.hands.iter().map(|h| h.blue).max().unwrap_or(0),
+    )
 }
 
 #[derive(PartialEq, Debug)]
@@ -424,4 +441,109 @@ fn test_calculate_possible() {
     let result = calculate_possible(&input, 12, 13, 14);
 
     assert_eq!(8, result);
+}
+
+#[test]
+fn test_calculate_minimal() {
+    let input = vec![
+        Game {
+            id: 1,
+            hands: vec![
+                Hand {
+                    red: 4,
+                    green: 0,
+                    blue: 3,
+                },
+                Hand {
+                    red: 1,
+                    green: 2,
+                    blue: 6,
+                },
+                Hand {
+                    red: 0,
+                    green: 2,
+                    blue: 0,
+                },
+            ],
+        },
+        Game {
+            id: 2,
+            hands: vec![
+                Hand {
+                    red: 0,
+                    green: 2,
+                    blue: 1,
+                },
+                Hand {
+                    red: 1,
+                    green: 3,
+                    blue: 4,
+                },
+                Hand {
+                    red: 0,
+                    green: 1,
+                    blue: 1,
+                },
+            ],
+        },
+        Game {
+            id: 3,
+            hands: vec![
+                Hand {
+                    red: 20,
+                    green: 8,
+                    blue: 6,
+                },
+                Hand {
+                    red: 4,
+                    green: 13,
+                    blue: 5,
+                },
+                Hand {
+                    red: 1,
+                    green: 5,
+                    blue: 0,
+                },
+            ],
+        },
+        Game {
+            id: 4,
+            hands: vec![
+                Hand {
+                    red: 3,
+                    green: 1,
+                    blue: 6,
+                },
+                Hand {
+                    red: 6,
+                    green: 3,
+                    blue: 0,
+                },
+                Hand {
+                    red: 14,
+                    green: 3,
+                    blue: 15,
+                },
+            ],
+        },
+        Game {
+            id: 5,
+            hands: vec![
+                Hand {
+                    red: 6,
+                    green: 3,
+                    blue: 1,
+                },
+                Hand {
+                    red: 1,
+                    green: 2,
+                    blue: 2,
+                },
+            ],
+        },
+    ];
+
+    let result = calculate_minimal(&input);
+
+    assert_eq!(2286, result);
 }
